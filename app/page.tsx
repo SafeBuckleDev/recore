@@ -454,12 +454,12 @@ export default function AudioEditor() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="mx-auto flex max-w-2xl flex-col items-center px-4 py-12">
-        <h1 className="mb-2 text-4xl font-bold tracking-tight text-zinc-900">
-          Audio Editor
+    <div className="flex min-h-screen flex-col items-center justify-center bg-white">
+      <div className="w-full max-w-2xl px-4 py-12">
+        <h1 className="mb-2 text-center text-4xl font-bold tracking-tight text-zinc-900">
+          Recore Studio
         </h1>
-        <p className="mb-10 text-sm text-zinc-500">
+        <p className="mb-10 text-center text-sm text-zinc-500">
           Upload, edit, and export your audio
         </p>
 
@@ -771,7 +771,7 @@ export default function AudioEditor() {
           </div>
         )}
       </div>
-      <footer className="py-6 text-center text-sm text-zinc-400">
+      <footer className="mt-auto py-6 text-center text-sm text-zinc-400">
         Built by{" "}
         <a
           href="https://github.com/SafeBuckleDev"
