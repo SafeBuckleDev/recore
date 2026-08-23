@@ -12,6 +12,7 @@ interface AudioState {
   volume: number;
   speed: number;
   reverb: number;
+  bass: number;
   waveformData: number[];
 }
 
@@ -22,6 +23,7 @@ export default function AudioEditor() {
   const convolverRef = useRef<ConvolverNode | null>(null);
   const dryGainRef = useRef<GainNode | null>(null);
   const wetGainRef = useRef<GainNode | null>(null);
+  const bassFilterRef = useRef<BiquadFilterNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const offsetRef = useRef<number>(0);
@@ -36,6 +38,7 @@ export default function AudioEditor() {
     volume: 0.75,
     speed: 1,
     reverb: 0,
+    bass: 0,
     waveformData: [],
   });
 
@@ -72,11 +75,16 @@ export default function AudioEditor() {
       convolverRef.current = audioContextRef.current.createConvolver();
       dryGainRef.current = audioContextRef.current.createGain();
       wetGainRef.current = audioContextRef.current.createGain();
+      bassFilterRef.current = audioContextRef.current.createBiquadFilter();
+      bassFilterRef.current.type = "lowshelf";
+      bassFilterRef.current.frequency.value = 150;
+      bassFilterRef.current.gain.value = 0;
 
       convolverRef.current.buffer = createImpulseResponse(2, 2);
 
-      gainNodeRef.current.connect(dryGainRef.current);
-      gainNodeRef.current.connect(convolverRef.current);
+      gainNodeRef.current.connect(bassFilterRef.current);
+      bassFilterRef.current.connect(dryGainRef.current);
+      bassFilterRef.current.connect(convolverRef.current);
       convolverRef.current.connect(wetGainRef.current);
       dryGainRef.current.connect(audioContextRef.current.destination);
       wetGainRef.current.connect(audioContextRef.current.destination);
@@ -121,6 +129,7 @@ export default function AudioEditor() {
         isPlaying: false,
         speed: 1,
         reverb: 0,
+        bass: 0,
       }));
 
       offsetRef.current = 0;
@@ -179,6 +188,10 @@ export default function AudioEditor() {
       gainNodeRef.current.gain.value = state.volume;
     }
 
+    if (bassFilterRef.current) {
+      bassFilterRef.current.gain.value = state.bass * 20;
+    }
+
     if (wetGainRef.current && dryGainRef.current) {
       wetGainRef.current.gain.value = state.reverb;
       dryGainRef.current.gain.value = 1 - state.reverb * 0.5;
@@ -210,7 +223,7 @@ export default function AudioEditor() {
         offsetRef.current = 0;
       }
     };
-  }, [state.audioBuffer, state.speed, state.volume, state.reverb, state.duration]);
+  }, [state.audioBuffer, state.speed, state.volume, state.reverb, state.bass, state.duration]);
 
   const pause = useCallback(() => {
     if (sourceNodeRef.current && audioContextRef.current) {
@@ -295,6 +308,16 @@ export default function AudioEditor() {
       if (wetGainRef.current && dryGainRef.current) {
         wetGainRef.current.gain.value = reverb;
         dryGainRef.current.gain.value = 1 - reverb * 0.5;
+      }
+    },
+    []
+  );
+
+  const updateBass = useCallback(
+    (bass: number) => {
+      setState((prev) => ({ ...prev, bass }));
+      if (bassFilterRef.current) {
+        bassFilterRef.current.gain.value = bass * 20;
       }
     },
     []
@@ -400,6 +423,11 @@ export default function AudioEditor() {
       const gainNode = offlineContext.createGain();
       gainNode.gain.value = state.volume;
 
+      const bassFilter = offlineContext.createBiquadFilter();
+      bassFilter.type = "lowshelf";
+      bassFilter.frequency.value = 150;
+      bassFilter.gain.value = state.bass * 20;
+
       const convolver = offlineContext.createConvolver();
       convolver.buffer = createImpulseResponse(2, 2);
 
@@ -410,8 +438,9 @@ export default function AudioEditor() {
       wetGain.gain.value = state.reverb;
 
       source.connect(gainNode);
-      gainNode.connect(dryGain);
-      gainNode.connect(convolver);
+      gainNode.connect(bassFilter);
+      bassFilter.connect(dryGain);
+      bassFilter.connect(convolver);
       convolver.connect(wetGain);
       dryGain.connect(offlineContext.destination);
       wetGain.connect(offlineContext.destination);
@@ -441,6 +470,7 @@ export default function AudioEditor() {
     state.speed,
     state.volume,
     state.reverb,
+    state.bass,
     state.fileName,
     audioBufferToWav,
     wavToMp3,
@@ -692,6 +722,30 @@ export default function AudioEditor() {
                   step="0.01"
                   value={state.reverb}
                   onChange={(e) => updateReverb(parseFloat(e.target.value))}
+                  className="w-full accent-zinc-900"
+                />
+              </div>
+
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <label
+                    htmlFor="bass"
+                    className="text-sm font-medium text-zinc-700"
+                  >
+                    Bass Boost
+                  </label>
+                  <span className="font-mono text-sm text-zinc-900">
+                    {Math.round(state.bass * 100)}%
+                  </span>
+                </div>
+                <input
+                  id="bass"
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={state.bass}
+                  onChange={(e) => updateBass(parseFloat(e.target.value))}
                   className="w-full accent-zinc-900"
                 />
               </div>
