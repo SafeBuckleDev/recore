@@ -456,7 +456,7 @@ export default function AudioEditor() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white">
       <div className="w-full max-w-2xl px-4 py-12">
-        <h1 className="mb-2 text-center text-4xl font-bold tracking-tight text-zinc-900">
+        <h1 className="mb-2 text-center text-5xl font-bold tracking-tight text-zinc-900">
           Recore Studio
         </h1>
         <p className="mb-10 text-center text-sm text-zinc-500">
@@ -663,9 +663,9 @@ export default function AudioEditor() {
                 <input
                   id="speed"
                   type="range"
-                  min="0.25"
-                  max="4"
-                  step="0.05"
+                  min="0.5"
+                  max="2"
+                  step="0.01"
                   value={state.speed}
                   onChange={(e) => updateSpeed(parseFloat(e.target.value))}
                   className="w-full accent-zinc-900"
@@ -771,7 +771,7 @@ export default function AudioEditor() {
           </div>
         )}
       </div>
-      <footer className="mt-auto py-6 text-center text-sm text-zinc-400">
+      <footer className="py-6 text-center text-sm text-zinc-400">
         Built by{" "}
         <a
           href="https://github.com/SafeBuckleDev"
