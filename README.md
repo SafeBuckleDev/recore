@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Recore Studio
+
+A browser-based audio editor built with Next.js and the Web Audio API. Upload audio files, adjust playback settings in real-time, and export your edited tracks.
+
+## Features
+
+- **File Upload** — Drag-and-drop or click to upload .mp3 and .wav files
+- **Playback Controls** — Play, pause, rewind 5 seconds, forward 5 seconds
+- **Waveform Visualization** — Interactive waveform display with seek support
+- **Speed Control** — Adjust playback speed from 0.25x to 4x
+- **Reverb Effect** — Add reverb with adjustable wet/dry mix
+- **Volume Control** — Adjust volume from 0% to 100%
+- **Progress Slider** — Scrub through the track with a range input
+- **Export** — Download your edited audio as an MP3 file
+
+## Tech Stack
+
+- [Next.js 16](https://nextjs.org/) — React framework
+- [React 19](https://react.dev/) — UI library
+- [Tailwind CSS 4](https://tailwindcss.com/) — Styling
+- [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) — Audio processing and effects
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Install dependencies
+pnpm install
+
+# Run the development server
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How It Works
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The app uses the Web Audio API to process audio in the browser:
 
-## Learn More
+- **AudioContext** handles playback and real-time effects
+- **ConvolverNode** generates reverb using a synthetic impulse response
+- **GainNode** controls volume
+- **OfflineAudioContext** renders the final mix during export
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+No audio data is sent to a server — everything runs locally in your browser.
