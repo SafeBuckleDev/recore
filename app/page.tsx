@@ -511,6 +511,25 @@ export default function AudioEditor() {
               onSeek={seek}
             />
 
+            <div className="hidden md:block h-16 w-full overflow-hidden rounded-lg bg-zinc-100">
+              <div className="flex h-full items-end justify-center gap-[3px] px-4 pb-2">
+                {state.waveformData.map((value, index) => {
+                  const percentage = index / state.waveformData.length;
+                  const isPlayed =
+                    percentage <= state.currentTime / (state.duration / state.speed);
+                  return (
+                    <div
+                      key={index}
+                      className={`flex-1 rounded-t transition-colors ${
+                        isPlayed ? "bg-zinc-900" : "bg-zinc-300"
+                      }`}
+                      style={{ height: `${value * 100}%` }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+
             <PlaybackControls
               currentTime={state.currentTime}
               duration={state.duration}
