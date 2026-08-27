@@ -8,6 +8,7 @@ import PlaybackControls from "./components/PlaybackControls";
 import SliderControl from "./components/SliderControl";
 import ExportButton from "./components/ExportButton";
 import Footer from "./components/Footer";
+import AboutCards from "./components/AboutCards";
 
 interface AudioState {
   file: File | null;
@@ -497,6 +498,8 @@ export default function AudioEditor() {
           onDragLeave={handleDragLeave}
           onFileInput={handleFileInput}
         />
+
+        {!state.audioBuffer && <AboutCards />}
 
         {state.audioBuffer && (
           <div className="mt-8 w-full space-y-6">
