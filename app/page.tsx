@@ -503,16 +503,8 @@ export default function AudioEditor() {
 
         {state.audioBuffer && (
           <div className="mt-8 w-full space-y-6">
-            <WaveformDisplay
-              waveformData={state.waveformData}
-              currentTime={state.currentTime}
-              duration={state.duration}
-              speed={state.speed}
-              onSeek={seek}
-            />
-
             <div className="hidden md:block h-16 w-full overflow-hidden rounded-lg bg-zinc-100">
-              <div className="flex h-full items-end justify-center gap-[3px] px-4 pb-2">
+              <div className="flex h-full items-end justify-center gap-[5px] px-4 pb-2">
                 {state.waveformData.map((value, index) => {
                   const percentage = index / state.waveformData.length;
                   const isPlayed =
@@ -520,7 +512,7 @@ export default function AudioEditor() {
                   return (
                     <div
                       key={index}
-                      className={`flex-1 rounded-t transition-colors ${
+                      className={`w-2 rounded-t transition-colors ${
                         isPlayed ? "bg-zinc-900" : "bg-zinc-300"
                       }`}
                       style={{ height: `${value * 100}%` }}
@@ -529,6 +521,14 @@ export default function AudioEditor() {
                 })}
               </div>
             </div>
+
+            <WaveformDisplay
+              waveformData={state.waveformData}
+              currentTime={state.currentTime}
+              duration={state.duration}
+              speed={state.speed}
+              onSeek={seek}
+            />
 
             <PlaybackControls
               currentTime={state.currentTime}
