@@ -1,6 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Header from "./components/Header";
+import DropZone from "./components/DropZone";
+import WaveformDisplay from "./components/WaveformDisplay";
+import PlaybackControls from "./components/PlaybackControls";
+import SliderControl from "./components/SliderControl";
+import ExportButton from "./components/ExportButton";
+import Footer from "./components/Footer";
 
 interface AudioState {
   file: File | null;
@@ -44,8 +51,6 @@ export default function AudioEditor() {
 
   const [isDragging, setIsDragging] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-
-  const effectiveDuration = state.duration / state.speed;
 
   const createImpulseResponse = useCallback(
     (duration: number, decay: number): AudioBuffer => {
@@ -477,365 +482,90 @@ export default function AudioEditor() {
     createImpulseResponse,
   ]);
 
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white">
       <div className="w-full max-w-2xl px-4 py-12">
-        <h1 className="mb-2 text-center text-5xl font-bold tracking-tight text-zinc-900">
-          Recore Studio
-        </h1>
-        <p className="mb-10 text-center text-sm text-zinc-500">
-          Upload, edit, and export your audio
-        </p>
+        <Header />
 
-        <div
-          className={`w-full rounded-2xl border-2 border-dashed p-10 text-center transition-colors ${
-            isDragging
-              ? "border-zinc-900 bg-zinc-100"
-              : "border-zinc-300 bg-zinc-50"
-          }`}
+        <DropZone
+          file={state.file}
+          fileName={state.fileName}
+          duration={state.duration}
+          isDragging={isDragging}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
-        >
-          {state.file ? (
-            <div className="flex items-center justify-center gap-3">
-              <svg
-                className="h-6 w-6 text-zinc-900"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                />
-              </svg>
-              <span className="font-medium text-zinc-900">{state.fileName}</span>
-              <span className="text-sm text-zinc-500">
-                {formatTime(state.duration)}
-              </span>
-              <label className="ml-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-300">
-                Change
-                <input
-                  type="file"
-                  className="hidden"
-                  accept=".mp3,.wav"
-                  onChange={handleFileInput}
-                />
-              </label>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <svg
-                className="mx-auto h-10 w-10 text-zinc-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-              <p className="font-medium text-zinc-700">
-                Drop your audio file here
-              </p>
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800">
-                Select File
-                <input
-                  type="file"
-                  className="hidden"
-                  accept=".mp3,.wav"
-                  onChange={handleFileInput}
-                />
-              </label>
-              <p className="text-xs text-zinc-400">MP3 or WAV</p>
-            </div>
-          )}
-        </div>
+          onFileInput={handleFileInput}
+        />
 
         {state.audioBuffer && (
           <div className="mt-8 w-full space-y-6">
-            <div
-              className="hidden md:relative h-28 w-full cursor-pointer rounded-xl bg-zinc-100 p-3"
-              onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const percentage = x / rect.width;
-                seek(percentage * effectiveDuration);
-              }}
-            >
-              <div className="absolute inset-0 flex items-end px-3 py-3">
-                {state.waveformData.map((value, index) => {
-                  const percentage = index / state.waveformData.length;
-                  const isPlayed =
-                    percentage <= state.currentTime / effectiveDuration;
-                  return (
-                    <div
-                      key={index}
-                      className={`mx-px flex-1 rounded-t transition-colors ${
-                        isPlayed ? "bg-zinc-900" : "bg-zinc-300"
-                      }`}
-                      style={{ height: `${value * 100}%` }}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-
-            <input
-              type="range"
-              min="0"
-              max={effectiveDuration}
-              step="0.01"
-              value={state.currentTime}
-              onChange={(e) => seek(parseFloat(e.target.value))}
-              className="w-full accent-zinc-900"
+            <WaveformDisplay
+              waveformData={state.waveformData}
+              currentTime={state.currentTime}
+              duration={state.duration}
+              speed={state.speed}
+              onSeek={seek}
             />
 
-            <div className="flex items-center justify-center gap-6">
-              <span className="w-12 text-right font-mono text-xs text-zinc-500">
-                {formatTime(state.currentTime)}
-              </span>
-
-              <button
-                onClick={() => seek(state.currentTime - 5)}
-                className="rounded-full p-2 text-zinc-400 transition-colors hover:text-zinc-900"
-                aria-label="Rewind 5 seconds"
-              >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"
-                  />
-                </svg>
-              </button>
-
-              <button
-                onClick={state.isPlaying ? pause : play}
-                className="flex h-14 w-14 items-center justify-center rounded-full bg-zinc-900 text-white transition-transform hover:scale-105"
-                aria-label={state.isPlaying ? "Pause" : "Play"}
-              >
-                {state.isPlaying ? (
-                  <svg
-                    className="h-6 w-6"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                  </svg>
-                ) : (
-                  <svg
-                    className="h-6 w-6"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                )}
-              </button>
-
-              <button
-                onClick={() => seek(state.currentTime + 5)}
-                className="rounded-full p-2 text-zinc-400 transition-colors hover:text-zinc-900"
-                aria-label="Forward 5 seconds"
-              >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"
-                  />
-                </svg>
-              </button>
-
-              <span className="w-12 font-mono text-xs text-zinc-500">
-                {formatTime(effectiveDuration)}
-              </span>
-            </div>
+            <PlaybackControls
+              currentTime={state.currentTime}
+              duration={state.duration}
+              speed={state.speed}
+              isPlaying={state.isPlaying}
+              onPlay={play}
+              onPause={pause}
+              onSeek={seek}
+            />
 
             <div className="space-y-5 p-6">
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <label
-                    htmlFor="speed"
-                    className="text-sm font-medium text-zinc-700"
-                  >
-                    Playback Speed
-                  </label>
-                  <span className="font-mono text-sm text-zinc-900">
-                    {state.speed.toFixed(2)}x
-                  </span>
-                </div>
-                <input
-                  id="speed"
-                  type="range"
-                  min="0.5"
-                  max="2"
-                  step="0.01"
-                  value={state.speed}
-                  onChange={(e) => updateSpeed(parseFloat(e.target.value))}
-                  className="w-full accent-zinc-900"
-                />
-              </div>
-
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <label
-                    htmlFor="reverb"
-                    className="text-sm font-medium text-zinc-700"
-                  >
-                    Reverb
-                  </label>
-                  <span className="font-mono text-sm text-zinc-900">
-                    {Math.round(state.reverb * 100)}%
-                  </span>
-                </div>
-                <input
-                  id="reverb"
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  value={state.reverb}
-                  onChange={(e) => updateReverb(parseFloat(e.target.value))}
-                  className="w-full accent-zinc-900"
-                />
-              </div>
-
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <label
-                    htmlFor="bass"
-                    className="text-sm font-medium text-zinc-700"
-                  >
-                    Bass Boost
-                  </label>
-                  <span className="font-mono text-sm text-zinc-900">
-                    {Math.round(state.bass * 100)}%
-                  </span>
-                </div>
-                <input
-                  id="bass"
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  value={state.bass}
-                  onChange={(e) => updateBass(parseFloat(e.target.value))}
-                  className="w-full accent-zinc-900"
-                />
-              </div>
-
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <label
-                    htmlFor="volume"
-                    className="text-sm font-medium text-zinc-700"
-                  >
-                    Volume
-                  </label>
-                  <span className="font-mono text-sm text-zinc-900">
-                    {Math.round(state.volume * 100)}%
-                  </span>
-                </div>
-                <input
-                  id="volume"
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  value={state.volume}
-                  onChange={(e) => updateVolume(parseFloat(e.target.value))}
-                  className="w-full accent-zinc-900"
-                />
-              </div>
+              <SliderControl
+                id="speed"
+                label="Playback Speed"
+                value={state.speed}
+                min={0.5}
+                max={2}
+                step={0.01}
+                displayValue={`${state.speed.toFixed(2)}x`}
+                onChange={updateSpeed}
+              />
+              <SliderControl
+                id="reverb"
+                label="Reverb"
+                value={state.reverb}
+                min={0}
+                max={1}
+                step={0.01}
+                displayValue={`${Math.round(state.reverb * 100)}%`}
+                onChange={updateReverb}
+              />
+              <SliderControl
+                id="bass"
+                label="Bass Boost"
+                value={state.bass}
+                min={0}
+                max={1}
+                step={0.01}
+                displayValue={`${Math.round(state.bass * 100)}%`}
+                onChange={updateBass}
+              />
+              <SliderControl
+                id="volume"
+                label="Volume"
+                value={state.volume}
+                min={0}
+                max={1}
+                step={0.01}
+                displayValue={`${Math.round(state.volume * 100)}%`}
+                onChange={updateVolume}
+              />
             </div>
 
-            <button
-              onClick={handleExport}
-              disabled={isExporting}
-              className="flex cursor-pointer w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isExporting ? (
-                <>
-                  <svg
-                    className="h-4 w-4 animate-spin"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  Exporting...
-                </>
-              ) : (
-                <>
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                    />
-                  </svg>
-                  Download MP3
-                </>
-              )}
-            </button>
+            <ExportButton isExporting={isExporting} onExport={handleExport} />
           </div>
         )}
       </div>
-      <footer className="py-6 text-center text-sm text-zinc-400">
-        Built by{" "}
-        <a
-          href="https://github.com/SafeBuckleDev"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline underline-offset-2 transition-colors hover:text-zinc-900"
-        >
-          SafeBuckleDev
-        </a>
-      </footer>
+      <Footer />
     </div>
   );
 }
