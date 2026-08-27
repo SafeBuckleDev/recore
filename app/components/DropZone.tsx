@@ -61,7 +61,7 @@ export default function DropZone({
         </div>
       ) : (
         <div className="space-y-3">
-          <div className="hidden md:relative h-16 w-full overflow-hidden rounded-lg bg-zinc-100">
+          <div className="hidden md:block md:relative h-16 w-full overflow-hidden rounded-lg bg-zinc-100">
             <div className="absolute inset-0 flex items-end justify-center gap-[3px] px-4 pb-2">
               {[
                 35, 50, 40, 65, 55, 70, 45, 60, 35, 50, 70, 55, 40, 65, 50,
