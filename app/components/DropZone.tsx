@@ -63,16 +63,17 @@ export default function DropZone({
         <div className="space-y-3">
           <div className="hidden md:relative h-16 w-full overflow-hidden rounded-lg bg-zinc-100">
             <div className="absolute inset-0 flex items-end justify-center gap-[3px] px-4 pb-2">
-              {Array.from({ length: 40 }).map((_, i) => {
-                const height = 20 + Math.sin(i * 0.4) * 30 + Math.cos(i * 0.7) * 20;
-                return (
-                  <div
-                    key={i}
-                    className="w-full rounded-t bg-zinc-300"
-                    style={{ height: `${height}%` }}
-                  />
-                );
-              })}
+              {[
+                35, 50, 40, 65, 55, 70, 45, 60, 35, 50, 70, 55, 40, 65, 50,
+                35, 60, 45, 70, 55, 40, 65, 50, 35, 55, 45, 60, 70, 40, 50,
+                65, 35, 55, 45, 60, 70, 50, 40, 65, 35,
+              ].map((height, i) => (
+                <div
+                  key={i}
+                  className="w-full rounded-t bg-zinc-300"
+                  style={{ height: `${height}%` }}
+                />
+              ))}
             </div>
           </div>
           <svg
